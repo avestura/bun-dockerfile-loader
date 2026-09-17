@@ -4,6 +4,21 @@
   "description": "Bun loader + library for parsing, editing, printing Dockerfiles and compiling them to BuildKit LLB",
   "type": "module",
   "license": "MIT",
+  "author": "Avestura <me@avestura.dev>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/avestura/bun-dockerfile-loader.git"
+  },
+  "homepage": "https://github.com/avestura/bun-dockerfile-loader#readme",
+  "bugs": {
+    "url": "https://github.com/avestura/bun-dockerfile-loader/issues"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": "./src/index.ts",
     "./plugin": "./src/plugin/index.ts",
@@ -16,6 +31,7 @@
     "src",
     "types",
     "README.md",
+    "LICENSE",
     "frontend.Dockerfile"
   ],
   "scripts": {
