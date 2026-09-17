@@ -1,0 +1,891 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bun-dockerfile-loader</title>
+<meta name="description" content="Load a Dockerfile in Bun, edit it as a typed AST, print it back losslessly, and compile it to BuildKit LLB — byte-for-byte identical to moby/buildkit's own dockerfile2llb.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0B6E75">
+<meta property="og:type" content="website">
+<meta property="og:title" content="bun-dockerfile-loader">
+<meta property="og:description" content="Parse, edit and print Dockerfiles in Bun, and compile them to BuildKit LLB with byte-for-byte parity against dockerfile2llb.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230B6E75'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M9 9h6M9 9v6'/%3E%3Cpath d='M23 23h-6M23 23v-6'/%3E%3Cpath d='M12 20l8-8'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --paper:#F1F4F6;
+  --surface:#FFFFFF;
+  --surface-sunk:#E9EEF1;
+  --ink:#0E141A;
+  --ink-soft:#33414D;
+  --muted:#5D6B77;
+  --rule:#D8E0E6;
+  --rule-strong:#BCC8D1;
+  --accent:#0B6E75;
+  --accent-soft:#E0F0F1;
+  --pass:#1F6F45;
+  --pass-soft:#E1F1E7;
+  --warn:#8A5A0B;
+  --warn-soft:#F7EEDC;
+  --code-bg:#0E1A20;
+  --code-ink:#DCE7EC;
+  --tok-key:#78C6C9;
+  --tok-str:#9FD39A;
+  --tok-num:#E0B267;
+  --tok-com:#6B8391;
+  --tok-fn:#8FBCE6;
+  --shadow:0 1px 2px rgba(14,20,26,.06),0 8px 24px -12px rgba(14,20,26,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0A0F13;
+    --surface:#121A20;
+    --surface-sunk:#0E151A;
+    --ink:#E6EDF2;
+    --ink-soft:#BAC7D1;
+    --muted:#8998A4;
+    --rule:#212D36;
+    --rule-strong:#31404B;
+    --accent:#45B3BA;
+    --accent-soft:#0E2B2E;
+    --pass:#5FBE8B;
+    --pass-soft:#102A1D;
+    --warn:#D6A343;
+    --warn-soft:#2B2213;
+    --code-bg:#0B1418;
+    --code-ink:#D7E3E9;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0A0F13;
+  --surface:#121A20;
+  --surface-sunk:#0E151A;
+  --ink:#E6EDF2;
+  --ink-soft:#BAC7D1;
+  --muted:#8998A4;
+  --rule:#212D36;
+  --rule-strong:#31404B;
+  --accent:#45B3BA;
+  --accent-soft:#0E2B2E;
+  --pass:#5FBE8B;
+  --pass-soft:#102A1D;
+  --warn:#D6A343;
+  --warn-soft:#2B2213;
+  --code-bg:#0B1418;
+  --code-ink:#D7E3E9;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:16px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+
+.shell{max-width:1060px;margin:0 auto;padding-inline:20px}
+
+/* ---- top bar ---- */
+.topbar{
+  position:sticky;top:0;z-index:20;
+  background:color-mix(in srgb,var(--paper) 88%,transparent);
+  backdrop-filter:saturate(1.6) blur(10px);
+  border-bottom:1px solid var(--rule);
+}
+.topbar-in{display:flex;align-items:center;gap:18px;height:56px}
+.brand{
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  font-weight:600;font-size:14px;
+  letter-spacing:-.02em;color:var(--ink);white-space:nowrap;
+}
+.brand:hover{text-decoration:none}
+.brand .dot{color:var(--accent)}
+.nav{display:flex;gap:16px;margin-left:auto;align-items:center}
+.nav a{font-size:13px;color:var(--muted);font-weight:500}
+.nav a:hover{color:var(--ink);text-decoration:none}
+.iconbtn{
+  display:inline-grid;place-items:center;width:30px;height:30px;
+  border:1px solid var(--rule);border-radius:6px;background:var(--surface);
+  color:var(--muted);cursor:pointer;padding:0;flex:none;
+}
+.iconbtn:hover{color:var(--ink);border-color:var(--rule-strong)}
+@media (max-width:700px){
+  .nav{gap:14px}
+  .nav .hide-sm{display:none}
+}
+
+/* ---- hero ---- */
+.hero{padding-block:56px 44px}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  font-size:11.5px;font-weight:500;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
+  display:flex;align-items:center;gap:9px;margin:0 0 18px;
+}
+.eyebrow::after{content:"";flex:1;height:1px;background:var(--rule);max-width:120px}
+h1{
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  font-size:clamp(25px,4.4vw,39px);font-weight:600;letter-spacing:-.035em;
+  margin:0 0 16px;line-height:1.14;text-wrap:balance;
+}
+.lede{
+  font-size:clamp(16.5px,2vw,19px);color:var(--ink-soft);max-width:62ch;
+  margin:0 0 26px;line-height:1.56;
+}
+.lede strong{color:var(--ink);font-weight:600}
+.cta-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.cmd{
+  display:flex;align-items:center;gap:12px;
+  background:var(--code-bg);color:var(--code-ink);
+  border-radius:8px;padding:11px 12px 11px 15px;
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;
+  box-shadow:var(--shadow);max-width:100%;
+}
+.cmd .prompt{color:var(--tok-com);margin-right:7px}
+.btn-ghost{
+  border:1px solid var(--rule-strong);background:var(--surface);color:var(--ink);
+  border-radius:8px;padding:11px 16px;font-size:13.5px;font-weight:500;
+  font-family:inherit;cursor:pointer;
+}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
+.copy{
+  border:0;background:transparent;color:var(--tok-com);cursor:pointer;
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  font-size:11.5px;padding:3px 7px;border-radius:5px;flex:none;
+}
+.copy:hover{color:var(--code-ink);background:rgba(255,255,255,.08)}
+
+/* ---- parity panel : the thesis ---- */
+.proof{
+  margin-top:42px;background:var(--surface);border:1px solid var(--rule);
+  border-radius:12px;box-shadow:var(--shadow);overflow:hidden;
+}
+.proof-head{
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+  padding:13px 18px;border-bottom:1px solid var(--rule);background:var(--surface-sunk);
+}
+.proof-head h2{font-size:13px;font-weight:600;margin:0;letter-spacing:-.01em}
+.stamp{
+  margin-left:auto;display:inline-flex;align-items:center;gap:6px;
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  font-size:11px;font-weight:500;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--pass);background:var(--pass-soft);
+  border:1px solid color-mix(in srgb,var(--pass) 28%,transparent);
+  padding:3px 9px;border-radius:99px;
+}
+.proof-src{
+  padding:14px 18px;border-bottom:1px solid var(--rule);
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  font-size:12.5px;color:var(--ink-soft);
+  white-space:pre;overflow-x:auto;
+}
+.proof-src .k{color:var(--accent);font-weight:500}
+.cols{display:grid;grid-template-columns:1fr 1fr}
+.col{padding:16px 18px;min-width:0}
+.col + .col{border-left:1px solid var(--rule)}
+.col h3{
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  font-size:11px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  margin:0 0 12px;
+}
+.col h3 .src{color:var(--ink);font-weight:600;text-transform:none;letter-spacing:0;font-size:12.5px}
+.digests{display:flex;flex-direction:column;gap:7px;margin:0;padding:0;list-style:none}
+.digests li{
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  font-size:11.5px;line-height:1.45;
+  color:var(--ink-soft);word-break:break-all;
+  padding-left:14px;position:relative;
+}
+.digests li::before{
+  content:"";position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:50%;
+  background:var(--pass);
+}
+.digests .algo{color:var(--muted)}
+.proof-foot{
+  padding:12px 18px;border-top:1px solid var(--rule);background:var(--surface-sunk);
+  font-size:13px;color:var(--muted);
+}
+.proof-foot code{
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  font-size:12px;color:var(--ink-soft);
+}
+@media (max-width:640px){
+  .cols{grid-template-columns:1fr}
+  .col + .col{border-left:0;border-top:1px solid var(--rule)}
+}
+
+/* ---- sections ---- */
+section.band{padding-block:52px;border-top:1px solid var(--rule)}
+.sec-head{margin-bottom:24px}
+h2.sec{
+  font-size:clamp(21px,2.6vw,27px);font-weight:600;letter-spacing:-.025em;
+  margin:0 0 10px;line-height:1.25;text-wrap:balance;
+}
+.sec-sub{color:var(--muted);max-width:66ch;margin:0;font-size:15.5px}
+h3.sub{font-size:16px;font-weight:600;margin:32px 0 10px;letter-spacing:-.01em}
+p{max-width:68ch}
+.band p{color:var(--ink-soft)}
+code:not(pre code){
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.88em;
+  background:var(--surface-sunk);border:1px solid var(--rule);
+  padding:1px 5px;border-radius:4px;color:var(--ink);
+}
+
+/* ---- code blocks ---- */
+.codewrap{position:relative;margin:16px 0}
+.copy-abs{
+  position:absolute;top:8px;right:8px;opacity:0;transition:opacity .15s;
+  border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);
+  color:var(--code-ink);
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;font-size:11px;
+  padding:3px 8px;border-radius:5px;cursor:pointer;
+}
+.codewrap:hover .copy-abs,.copy-abs:focus-visible{opacity:1}
+pre{
+  margin:0;background:var(--code-bg);color:var(--code-ink);
+  border-radius:9px;padding:15px 17px;overflow-x:auto;
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  font-size:13px;line-height:1.62;
+  box-shadow:var(--shadow);
+}
+pre code{font-family:inherit;background:none;border:0;padding:0;color:inherit}
+.filename{
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  font-size:11.5px;color:var(--muted);
+  margin:0 0 6px;letter-spacing:.02em;
+}
+.hljs-keyword,.hljs-built_in,.hljs-literal{color:var(--tok-key)}
+.hljs-string,.hljs-meta .hljs-string{color:var(--tok-str)}
+.hljs-number,.hljs-attr,.hljs-attribute{color:var(--tok-num)}
+.hljs-comment,.hljs-quote{color:var(--tok-com);font-style:italic}
+.hljs-title,.hljs-title.function_,.hljs-section{color:var(--tok-fn)}
+.hljs-meta{color:var(--tok-com)}
+.hljs-name,.hljs-type,.hljs-variable,.hljs-template-variable{color:var(--tok-key)}
+.hljs-symbol,.hljs-bullet,.hljs-params,.hljs-property{color:var(--code-ink)}
+
+/* ---- tables ---- */
+.tablewrap{overflow-x:auto;margin:16px 0;border:1px solid var(--rule);border-radius:9px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:440px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  font-size:11px;font-weight:500;
+  letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+  background:var(--surface-sunk);
+}
+td{color:var(--ink-soft)}
+tbody tr:last-child td{border-bottom:0}
+.yes{color:var(--pass);font-weight:600}
+.no{color:var(--warn);font-weight:600}
+
+/* ---- callouts ---- */
+.note{
+  border-left:3px solid var(--accent);background:var(--accent-soft);
+  padding:13px 16px;border-radius:0 8px 8px 0;margin:18px 0;font-size:14.5px;
+}
+.note p{margin:0;max-width:none;color:var(--ink-soft)}
+.note.caution{border-left-color:var(--warn);background:var(--warn-soft)}
+.note .tag{
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  font-size:11px;font-weight:600;
+  letter-spacing:.09em;text-transform:uppercase;color:var(--accent);
+  display:block;margin-bottom:5px;
+}
+.note.caution .tag{color:var(--warn)}
+
+/* ---- routes ---- */
+.routes{margin-top:22px}
+.route{display:grid;grid-template-columns:auto 1fr;gap:18px;padding-block:24px;border-top:1px solid var(--rule)}
+.route:first-child{border-top:0;padding-top:4px}
+.route-n{
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  font-size:12px;font-weight:600;color:var(--accent);
+  border:1px solid var(--rule-strong);border-radius:7px;
+  width:30px;height:30px;display:grid;place-items:center;background:var(--surface);
+}
+.route h3{margin:2px 0 6px;font-size:17px;font-weight:600;letter-spacing:-.015em}
+.pill{
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  font-size:10.5px;letter-spacing:.07em;
+  text-transform:uppercase;padding:2px 7px;border-radius:99px;margin-left:8px;
+  vertical-align:2px;font-weight:500;white-space:nowrap;
+}
+.pill.rec{color:var(--pass);background:var(--pass-soft);border:1px solid color-mix(in srgb,var(--pass) 28%,transparent)}
+.pill.part{color:var(--warn);background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 28%,transparent)}
+.route-body{min-width:0}
+@media (max-width:560px){
+  .route{grid-template-columns:1fr;gap:10px}
+}
+
+/* ---- coverage ---- */
+.cov{display:grid;grid-template-columns:1.35fr 1fr;gap:34px;align-items:start}
+@media (max-width:760px){.cov{grid-template-columns:1fr;gap:26px}}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.chip{
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;
+  border:1px solid var(--rule);background:var(--surface);color:var(--ink-soft);
+  padding:3px 8px;border-radius:5px;
+}
+.gaps{
+  list-style:none;padding:0;margin:14px 0 0;
+  border:1px solid var(--rule);border-radius:9px;background:var(--surface);overflow:hidden;
+}
+.gaps li{padding:11px 15px;border-bottom:1px solid var(--rule);font-size:14px;color:var(--ink-soft)}
+.gaps li:last-child{border-bottom:0}
+
+/* ---- footer ---- */
+footer{border-top:1px solid var(--rule);padding-block:34px 44px}
+.foot-in{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+.foot-links{display:flex;flex-wrap:wrap;gap:18px;font-size:14px}
+.foot-meta{
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  font-size:12px;color:var(--muted);
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="shell topbar-in">
+    <a class="brand" href="#top">bun<span class="dot">-</span>dockerfile<span class="dot">-</span>loader</a>
+    <nav class="nav">
+      <a href="#parity" class="hide-sm">Parity</a>
+      <a href="#install">Install</a>
+      <a href="#editing" class="hide-sm">Editing</a>
+      <a href="#llb">LLB</a>
+      <a href="#coverage" class="hide-sm">Coverage</a>
+      <a href="https://github.com/avestura/bun-dockerfile-loader">GitHub</a>
+      <button class="iconbtn" id="theme-toggle" type="button" aria-label="Toggle colour theme" title="Toggle colour theme">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+        </svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <div class="shell hero">
+    <p class="eyebrow">Bun loader &middot; BuildKit LLB</p>
+    <h1>Dockerfiles as a typed AST, compiled to LLB.</h1>
+    <p class="lede">
+      Load a Dockerfile in Bun, edit it as a typed AST, print it back losslessly, and compile it
+      to BuildKit <strong>LLB</strong> &mdash; byte-for-byte identical to what <code>moby/buildkit</code>'s
+      own <code>dockerfile2llb</code> produces.
+    </p>
+    <div class="cta-row">
+      <div class="cmd">
+        <span><span class="prompt">$</span>bun add bun-dockerfile-loader</span>
+        <button class="copy" type="button" data-copy="bun add bun-dockerfile-loader">copy</button>
+      </div>
+      <a class="btn-ghost" href="https://www.npmjs.com/package/bun-dockerfile-loader">View on npm</a>
+    </div>
+
+    <section class="proof" aria-label="Parity demonstration">
+      <div class="proof-head">
+        <h2>The same two instructions, marshaled by both implementations</h2>
+        <span class="stamp">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          bytes identical
+        </span>
+      </div>
+      <div class="proof-src"><span class="k">FROM</span> alpine:3.20
+<span class="k">RUN</span> echo hello</div>
+      <div class="cols">
+        <div class="col">
+          <h3><span class="src">moby/buildkit</span> dockerfile2llb (Go)</h3>
+          <ul class="digests">
+            <li><span class="algo">sha256:</span>a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0</li>
+            <li><span class="algo">sha256:</span>99d538836b54c27c5278ebced03e235e2f1564a13a13971d58a79c57d8659711</li>
+            <li><span class="algo">sha256:</span>d8894131b64b94d6aa479c7668630ccff25986370467b8702e246daf4a6241e1</li>
+          </ul>
+        </div>
+        <div class="col">
+          <h3><span class="src">bun-dockerfile-loader</span> (TypeScript)</h3>
+          <ul class="digests">
+            <li><span class="algo">sha256:</span>a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0</li>
+            <li><span class="algo">sha256:</span>99d538836b54c27c5278ebced03e235e2f1564a13a13971d58a79c57d8659711</li>
+            <li><span class="algo">sha256:</span>d8894131b64b94d6aa479c7668630ccff25986370467b8702e246daf4a6241e1</li>
+          </ul>
+        </div>
+      </div>
+      <div class="proof-foot">
+        Vertex digests for <code>01-basic.Dockerfile</code>, with a deterministic resolver and
+        <code>localUniqueID: "fixed-unique-id"</code>. The marshaled protobuf is compared as hex,
+        not only as digests.
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= PARITY ================= -->
+  <section class="band" id="parity">
+    <div class="shell">
+      <div class="sec-head">
+        <p class="eyebrow">Receipts</p>
+        <h2 class="sec">Why the parity claim is checkable</h2>
+        <p class="sec-sub">
+          The test suite does not compare against hand-written expectations. It compares against
+          BuildKit itself.
+        </p>
+      </div>
+
+      <p>
+        <code>test/fixtures/llb-golden.go</code> builds four LLB graphs with the real Go
+        <code>client/llb</code> package and dumps every marshaled <code>Op</code> as hex.
+        <code>test/fixtures/df-golden.go</code> runs the real
+        <code>frontend/dockerfile/dockerfile2llb</code> over <code>test/fixtures/dockerfiles/*</code>
+        and dumps the definition, the op metadata and the resulting image config.
+      </p>
+      <p>
+        <code>bun test</code> then asserts that this library produces the same bytes, the same
+        SHA-256 vertex digests, the same progress names, the same capability sets and the same
+        image config. Regenerate the fixtures with:
+      </p>
+
+      <div class="codewrap">
+        <pre><code class="language-bash">go run test/fixtures/llb-golden.go &gt; test/fixtures/llb-golden.json
+go run test/fixtures/df-golden.go test/fixtures/dockerfiles &gt; test/fixtures/df-golden.json</code></pre>
+      </div>
+
+      <h3 class="sub">Things that were easy to get wrong</h3>
+      <p>Matching the bytes meant matching several details that stay invisible until a digest disagrees:</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th style="width:32%">Detail</th><th>Why it matters</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Oneof fields emit last</td>
+              <td>Go's protobuf runtime uses <code>order.LegacyFieldOrder</code>, so <code>Op.platform</code> (field 10) and <code>Op.constraints</code> (11) are written <em>before</em> the <code>op</code> oneof (2&ndash;8). Field-number order gives different digests.</td>
+            </tr>
+            <tr>
+              <td>Map key ordering</td>
+              <td>Maps are sorted by the <strong>UTF-8 bytes</strong> of the key, and map entries always emit both key and value even when empty.</td>
+            </tr>
+            <tr>
+              <td>Stripped platforms</td>
+              <td><code>Op.platform</code> is stripped for <code>local://</code>, <code>git://</code> and HTTP sources, and for <code>FileOp</code>, <code>MergeOp</code> and <code>DiffOp</code>.</td>
+            </tr>
+            <tr>
+              <td>Expansion is regex, not glob</td>
+              <td><code>${v#p}</code>, <code>${v%p}</code> and <code>${v/p/r}</code> are regex-based in BuildKit, so <code>*</code> crosses <code>/</code> &mdash; unlike <code>filepath.Match</code>.</td>
+            </tr>
+            <tr>
+              <td>Mount ordering</td>
+              <td>Exec mounts are sorted by target, but secret and SSH mounts are appended afterwards and carry no output index.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= INSTALL / LOADER ================= -->
+  <section class="band" id="install">
+    <div class="shell">
+      <div class="sec-head">
+        <p class="eyebrow">Getting started</p>
+        <h2 class="sec">Install and register the loader</h2>
+        <p class="sec-sub">Register the preload once and a Dockerfile becomes an importable module.</p>
+      </div>
+
+      <div class="codewrap">
+        <p class="filename">bunfig.toml</p>
+        <pre><code class="language-ini">preload = ["bun-dockerfile-loader/preload"]
+
+[test]
+preload = ["bun-dockerfile-loader/preload"]</code></pre>
+      </div>
+
+      <div class="codewrap">
+        <pre><code class="language-typescript">import df, { source, toLLB, warnings } from "./Dockerfile.prod";</code></pre>
+      </div>
+
+      <p>Or in the bundler:</p>
+      <div class="codewrap">
+        <pre><code class="language-typescript">import { dockerfileLoader } from "bun-dockerfile-loader";
+
+await Bun.build({
+  entrypoints: ["./src/index.ts"],
+  plugins: [dockerfileLoader()],
+});</code></pre>
+      </div>
+
+      <h3 class="sub">Which file names work where</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Name</th><th style="width:17%">Bundler</th><th style="width:17%">Runtime</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>Dockerfile.prod</code>, <code>app.dockerfile</code>, <code>Containerfile.dev</code></td>
+              <td class="yes">Yes</td><td class="yes">Yes</td>
+            </tr>
+            <tr>
+              <td>bare <code>Dockerfile</code> / <code>Containerfile</code></td>
+              <td class="yes">Yes</td><td class="no">No</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note caution">
+        <span class="tag">Runtime limitation</span>
+        <p>
+          Bun's runtime picks a loader from the file extension <em>before</em> plugins are consulted,
+          so an extensionless <code>Dockerfile</code> is parsed as JavaScript and never reaches
+          <code>onLoad</code>. There is no plugin-side workaround &mdash; <code>onResolve</code> is not
+          consulted for it either. Read those explicitly with
+          <code>Dockerfile.fromFile("Dockerfile")</code>. The bundler has no such restriction.
+        </p>
+      </div>
+
+      <h3 class="sub">Types</h3>
+      <div class="codewrap">
+        <p class="filename">tsconfig.json</p>
+        <pre><code class="language-json">{ "compilerOptions": { "types": ["bun", "bun-dockerfile-loader/types"] } }</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= EDITING ================= -->
+  <section class="band" id="editing">
+    <div class="shell">
+      <div class="sec-head">
+        <p class="eyebrow">Editing</p>
+        <h2 class="sec">Lossless by default</h2>
+        <p class="sec-sub">
+          Untouched instructions keep their original bytes, so a parse/print round-trip is
+          byte-identical &mdash; comments, spacing, continuations, heredocs and <code>#&nbsp;escape=</code>
+          directives included. Only nodes you actually edit get re-rendered.
+        </p>
+      </div>
+
+      <div class="codewrap">
+        <pre><code class="language-typescript">import { Dockerfile, builders as b } from "bun-dockerfile-loader";
+
+const df = await Dockerfile.fromFile("Dockerfile");
+
+df.syntax = "docker/dockerfile:1.7";                   // parser directives
+df.mapBaseImages((img) =&gt; `mirror.internal/${img}`);   // rewrite every FROM
+
+const build = df.stage("build")!;                      // by name, index or -1
+build.setEnv("CGO_ENABLED", "0");
+build.setLabel("org.opencontainers.image.revision", rev);
+build.add(b.run("go build ./...", { mounts: [b.mount({ type: "cache", target: "/root/.cache/go-build" })] }));
+
+df.insertAfter(build.find("Workdir")[0]!, b.copy(["go.mod", "go.sum"], "./"));
+df.removeWhere((i) =&gt; i.type === "Maintainer");
+
+console.log(df.toString());</code></pre>
+      </div>
+
+      <p>
+        <code>Dockerfile.empty()</code> plus the <code>builders</code> module constructs a file from
+        scratch. Every instruction is a discriminated union member, with flags, mounts and heredocs
+        already parsed:
+      </p>
+      <div class="chips">
+        <span class="chip">From</span><span class="chip">Run</span><span class="chip">Copy</span>
+        <span class="chip">Add</span><span class="chip">Env</span><span class="chip">Arg</span>
+        <span class="chip">Label</span><span class="chip">Expose</span><span class="chip">Volume</span>
+        <span class="chip">User</span><span class="chip">Workdir</span><span class="chip">Cmd</span>
+        <span class="chip">Entrypoint</span><span class="chip">Healthcheck</span><span class="chip">Shell</span>
+        <span class="chip">StopSignal</span><span class="chip">Onbuild</span><span class="chip">Maintainer</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LLB ================= -->
+  <section class="band" id="llb">
+    <div class="shell">
+      <div class="sec-head">
+        <p class="eyebrow">Compiling</p>
+        <h2 class="sec">Dockerfile to LLB</h2>
+        <p class="sec-sub">
+          The result carries the state, the marshaled definition, the OCI image config, the
+          reachable stages, the context paths and the build args that were actually referenced.
+        </p>
+      </div>
+
+      <div class="codewrap">
+        <pre><code class="language-typescript">import { dockerfileToLLB, registryResolver, writeDefinition, dumpLLB } from "bun-dockerfile-loader";
+
+const result = await dockerfileToLLB(df, {
+  target: "runtime",
+  buildArgs: { VERSION: "1.4.0" },
+  targetPlatform: { OS: "linux", Architecture: "arm64" },
+  metaResolver: registryResolver(),   // pin FROM and read the base config
+});
+
+await writeDefinition("out.pb", result.definition);
+console.log(dumpLLB(result.definition));   // same shape as `buildctl debug dump-llb`</code></pre>
+      </div>
+
+      <h3 class="sub">Resolvers</h3>
+      <p>
+        <code>FROM</code> resolution decides whether the base image's <code>ENV</code>,
+        <code>WORKDIR</code>, <code>USER</code>, <code>CMD</code> and <code>ENTRYPOINT</code> are
+        inherited, and whether the reference gets pinned to a digest.
+      </p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th style="width:30%">Resolver</th><th>Behaviour</th></tr></thead>
+          <tbody>
+            <tr><td><code>nullResolver()</code> <span style="color:var(--muted)">&mdash; default</span></td><td>Offline. No inherited config, references unpinned.</td></tr>
+            <tr><td><code>registryResolver()</code></td><td>Talks to the registry over HTTPS with anonymous or basic auth; pins digests and reads the real config.</td></tr>
+            <tr><td><code>staticResolver({...})</code></td><td>Serves configs you supply, for tests and hermetic builds.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <span class="tag">Reproducibility</span>
+        <p>
+          BuildKit generates a <strong>random</strong> <code>local.unique</code> for the build context
+          on every marshal, so definitions differ between runs. Pass <code>localUniqueID</code> (or a
+          <code>sessionID</code>) to pin it.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ROUTES ================= -->
+  <section class="band" id="image">
+    <div class="shell">
+      <div class="sec-head">
+        <p class="eyebrow">Three routes</p>
+        <h2 class="sec">Getting to an actual image</h2>
+        <p class="sec-sub">There are three routes, and they are not equivalent.</p>
+      </div>
+
+      <div class="routes">
+        <article class="route">
+          <div class="route-n">1</div>
+          <div class="route-body">
+            <h3><code>docker buildx build</code><span class="pill rec">recommended</span></h3>
+            <p>
+              The edited document is printed back to Dockerfile text and handed to the real frontend
+              over stdin. Everything works, including the image config.
+            </p>
+            <div class="codewrap">
+              <pre><code class="language-typescript">import { buildWithBuildx } from "bun-dockerfile-loader";
+await buildWithBuildx({ dockerfile: df, context: ".", tags: ["app:dev"], load: true });</code></pre>
+            </div>
+          </div>
+        </article>
+
+        <article class="route">
+          <div class="route-n">2</div>
+          <div class="route-body">
+            <h3><code>buildctl</code> with raw LLB<span class="pill part">filesystem only</span></h3>
+            <p>
+              A raw LLB definition produces a filesystem, not a configured image.
+              <code>ENV</code>, <code>CMD</code>, <code>ENTRYPOINT</code>, <code>LABEL</code>,
+              <code>USER</code>, <code>WORKDIR</code> and <code>EXPOSE</code> live in the OCI image
+              config, which BuildKit only accepts from a <em>frontend</em> through the gateway API &mdash;
+              stdin-fed LLB has no channel for it. <code>dockerfileToLLB</code> returns that config as
+              <code>result.image</code> so you can apply it yourself.
+            </p>
+            <div class="codewrap">
+              <pre><code class="language-typescript">import { buildWithBuildctl } from "bun-dockerfile-loader";
+await buildWithBuildctl({
+  definition: result.definition,
+  locals: { context: "." },
+  output: "type=local,dest=./out",
+});</code></pre>
+            </div>
+            <p>
+              If <code>buildctl</code> is not on <code>PATH</code>, the driver falls back to
+              <code>docker run --rm -i --network=host moby/buildkit buildctl</code>.
+            </p>
+          </div>
+        </article>
+
+        <article class="route">
+          <div class="route-n">3</div>
+          <div class="route-body">
+            <h3>Gateway frontend<span class="pill part">LLB + image config</span></h3>
+            <p>
+              The frontend speaks gRPC to buildkitd over its stdio pipe (HTTP/2 via
+              <code>node:http2</code> with a custom <code>createConnection</code>), reads the
+              Dockerfile through <code>ReadFile</code>, resolves base images through the daemon's own
+              resolver, solves the generated definition, and returns the result <strong>with</strong>
+              <code>containerimage.config</code>. That is the only way to get both your LLB and a
+              properly configured image.
+            </p>
+            <div class="codewrap">
+              <pre><code class="language-dockerfile"># syntax=your-registry/bun-dockerfile-frontend:latest
+FROM alpine:3.20</code></pre>
+            </div>
+            <div class="note caution">
+              <span class="tag">Status of the frontend</span>
+              <p>
+                The full protocol flow &mdash; Ping, Solve, ReadFile, ResolveImageConfig, Return, error
+                propagation, image-config metadata &mdash; is covered by <code>test/frontend.test.ts</code>
+                against an in-process LLBBridge server over a real HTTP/2 socket. It has
+                <strong>not</strong> been run against a live buildkitd in this repository, because
+                that needs a running Docker engine. Smoke-test it before depending on it.
+              </p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= COVERAGE ================= -->
+  <section class="band" id="coverage">
+    <div class="shell">
+      <div class="sec-head">
+        <p class="eyebrow">Scope</p>
+        <h2 class="sec">Coverage, and what is missing</h2>
+      </div>
+
+      <div class="cov">
+        <div>
+          <h3 class="sub" style="margin-top:0">The full <code>dockerfile.v0</code> instruction set</h3>
+          <p>
+            Multi-stage builds and stage references by name or index, <code>FROM --platform</code>,
+            global and stage <code>ARG</code> with the built-in <code>TARGET*</code>/<code>BUILD*</code>
+            variables, <code>ENV</code>/<code>LABEL</code> in both modern and legacy forms,
+            <code>RUN</code> in shell and exec form, heredocs (including the
+            shebang-becomes-a-script case), <code>RUN --mount</code> of every type with sharing modes
+            and uid/gid/mode, <code>COPY</code>/<code>ADD</code> with all their flags, HTTP and Git
+            sources, and the full bash-style parameter expansion BuildKit implements.
+          </p>
+          <div class="chips">
+            <span class="chip">--mount=bind</span><span class="chip">cache</span><span class="chip">tmpfs</span>
+            <span class="chip">secret</span><span class="chip">ssh</span><span class="chip">--network</span>
+            <span class="chip">--security</span><span class="chip">--from</span><span class="chip">--chown</span>
+            <span class="chip">--chmod</span><span class="chip">--link</span><span class="chip">--parents</span>
+            <span class="chip">--exclude</span><span class="chip">--checksum</span><span class="chip">--keep-git-dir</span>
+            <span class="chip">--unpack</span><span class="chip">ONBUILD</span><span class="chip">HEALTHCHECK</span>
+            <span class="chip">SHELL</span><span class="chip">VOLUME</span><span class="chip">STOPSIGNAL</span>
+            <span class="chip">EXPOSE</span><span class="chip"># syntax</span><span class="chip"># escape</span>
+            <span class="chip"># check</span>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="sub" style="margin-top:0">Known gaps</h3>
+          <ul class="gaps">
+            <li>Named contexts (<code>--build-context foo=...</code>) are not wired through.</li>
+            <li><code>ONBUILD</code> triggers inherited from a base image are recorded in the image config but not replayed.</li>
+            <li>Source maps (<code>Definition.Source</code>) are not populated, so frontend errors do not point back at Dockerfile lines.</li>
+            <li>Linter rules and build outlines are not implemented.</li>
+            <li>SBOM/provenance attestations are not emitted.</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 class="sub">Development</h3>
+      <div class="codewrap">
+        <pre><code class="language-bash">bun install
+bun test          # 94 tests, including the BuildKit parity suites
+bun run typecheck</code></pre>
+      </div>
+      <p style="font-size:14.5px;color:var(--muted)">
+        The Go golden generators need a Go toolchain; they are only required when regenerating fixtures.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="shell foot-in">
+    <div class="foot-links">
+      <a href="https://www.npmjs.com/package/bun-dockerfile-loader">npm</a>
+      <a href="https://github.com/avestura/bun-dockerfile-loader">GitHub</a>
+      <a href="https://github.com/avestura/bun-dockerfile-loader/issues">Issues</a>
+      <a href="https://github.com/avestura/bun-dockerfile-loader/blob/master/LICENSE">MIT License</a>
+    </div>
+    <div class="foot-meta">bun-dockerfile-loader &middot; v0.1.0</div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/dockerfile.min.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  // ---- theme -------------------------------------------------------------
+  var root = document.documentElement;
+  var KEY = "bdl-theme";
+  try {
+    var saved = localStorage.getItem(KEY);
+    if (saved === "dark" || saved === "light") root.setAttribute("data-theme", saved);
+  } catch (e) { /* storage unavailable */ }
+
+  var toggle = document.getElementById("theme-toggle");
+  if (toggle) {
+    toggle.addEventListener("click", function () {
+      var explicit = root.getAttribute("data-theme");
+      var dark = explicit
+        ? explicit === "dark"
+        : window.matchMedia("(prefers-color-scheme: dark)").matches;
+      var next = dark ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem(KEY, next); } catch (e) { /* ignore */ }
+    });
+  }
+
+  // ---- highlighting ------------------------------------------------------
+  if (window.hljs) {
+    try { window.hljs.highlightAll(); } catch (e) { /* leave code unhighlighted */ }
+  }
+
+  // ---- copy buttons ------------------------------------------------------
+  function flash(btn, text) {
+    var original = btn.getAttribute("data-label") || btn.textContent;
+    btn.setAttribute("data-label", original);
+    btn.textContent = text;
+    setTimeout(function () { btn.textContent = original; }, 1400);
+  }
+
+  function copy(text, btn) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { flash(btn, "copied"); },
+        function () { flash(btn, "copy failed"); }
+      );
+    } else {
+      flash(btn, "copy failed");
+    }
+  }
+
+  document.querySelectorAll("[data-copy]").forEach(function (btn) {
+    btn.addEventListener("click", function () { copy(btn.getAttribute("data-copy"), btn); });
+  });
+
+  document.querySelectorAll(".codewrap").forEach(function (wrap) {
+    var code = wrap.querySelector("pre code");
+    if (!code) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-abs";
+    btn.textContent = "copy";
+    btn.setAttribute("aria-label", "Copy code to clipboard");
+    btn.addEventListener("click", function () { copy(code.textContent, btn); });
+    wrap.appendChild(btn);
+  });
+})();
+</script>
+</body>
+</html>
