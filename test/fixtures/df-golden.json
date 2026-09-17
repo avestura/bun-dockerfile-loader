@@ -1,0 +1,961 @@
+[
+ {
+  "name": "01-basic",
+  "digests": [
+   "sha256:a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0",
+   "sha256:99d538836b54c27c5278ebced03e235e2f1564a13a13971d58a79c57d8659711",
+   "sha256:d8894131b64b94d6aa479c7668630ccff25986370467b8702e246daf4a6241e1"
+  ],
+  "hexes": [
+   "520e0a05616d64363412056c696e75785a001a760a74646f636b65722d696d6167653a2f2f646f636b65722e696f2f6c6962726172792f616c70696e653a332e3230407368613235363a37356265396334393062323162373933313933663437626530646166316531626132383363336130303263386538343039316532633837316363343966323139",
+   "0a490a477368613235363a61363062326663396433623534363733353036633261393030656530393263353363323931643231336162353135333963316562666365323263353234306130520e0a05616d64363412056c696e75785a0012680a610a072f62696e2f73680a022d630a0a6563686f2068656c6c6f1241504154483d2f7573722f6c6f63616c2f7362696e3a2f7573722f6c6f63616c2f62696e3a2f7573722f7362696e3a2f7573722f62696e3a2f7362696e3a2f62696e1a012f580112031a012f",
+   "0a490a477368613235363a39396435333838333662353463323763353237386562636564303365323335653266313536346131336131333937316435386137396335376438363539373131"
+  ],
+  "image": {
+   "architecture": "amd64",
+   "os": "linux",
+   "rootfs": {
+    "type": "layers",
+    "diff_ids": [
+     "sha256:aaaa"
+    ]
+   },
+   "history": [
+    {
+     "created_by": "base"
+    },
+    {
+     "created_by": "RUN /bin/sh -c echo hello # buildkit",
+     "comment": "buildkit.dockerfile.v0"
+    }
+   ],
+   "config": {
+    "Env": [
+     "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    ],
+    "Cmd": [
+     "/bin/sh"
+    ]
+   }
+  },
+  "metadata": {
+   "sha256:99d538836b54c27c5278ebced03e235e2f1564a13a13971d58a79c57d8659711": {
+    "caps": [
+     "exec.meta.base",
+     "exec.meta.setsdefaultpath",
+     "exec.mount.bind"
+    ],
+    "description": {
+     "com.docker.dockerfile.v1.command": "RUN echo hello",
+     "llb.customname": "[2/2] RUN echo hello"
+    }
+   },
+   "sha256:a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0": {
+    "caps": [
+     "source.image"
+    ],
+    "description": {
+     "com.docker.dockerfile.v1.command": "FROM alpine:3.20",
+     "llb.customname": "[1/2] FROM docker.io/library/alpine:3.20@sha256:75be9c490b21b793193f47be0daf1e1ba283c3a002c8e84091e2c871cc49f219"
+    }
+   },
+   "sha256:d8894131b64b94d6aa479c7668630ccff25986370467b8702e246daf4a6241e1": {
+    "caps": [
+     "constraints",
+     "meta.description",
+     "platform"
+    ]
+   }
+  }
+ },
+ {
+  "name": "02-env-workdir",
+  "digests": [
+   "sha256:a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0",
+   "sha256:cbb2ce1ae3ee3fb504a5c4624751c152c7065e25fb8db861061c9124c43d2e57",
+   "sha256:0eb3d21776595ae24a5ca875f8ba609a187aeec1dbefc7948fbaa5e098b20afb",
+   "sha256:7718fa441f4b0283bbf46041dc2f7f40f00ad0eaccd8c373f9b9e8a2f9f029e1"
+  ],
+  "hexes": [
+   "520e0a05616d64363412056c696e75785a001a760a74646f636b65722d696d6167653a2f2f646f636b65722e696f2f6c6962726172792f616c70696e653a332e3230407368613235363a37356265396334393062323162373933313933663437626530646166316531626132383363336130303263386538343039316532633837316363343966323139",
+   "0a490a477368613235363a613630623266633964336235343637333530366332613930306565303932633533633239316432313361623531353339633165626663653232633532343061305a002225122310ffffffffffffffffff0132160a042f73727610ed03180128ffffffffffffffffff01",
+   "0a490a477368613235363a63626232636531616533656533666235303461356334363234373531633135326337303635653235666238646238363130363163393132346334336432653537520e0a05616d64363412056c696e75785a001298010a90010a072f62696e2f73680a022d630a196563686f2022244150505f454e5622203e20656e762e7478741241504154483d2f7573722f6c6f63616c2f7362696e3a2f7573722f6c6f63616c2f62696e3a2f7573722f7362696e3a2f7573722f62696e3a2f7362696e3a2f62696e120d4150505f484f4d453d2f737276120c4150505f454e563d70726f641a042f737276580112031a012f",
+   "0a490a477368613235363a30656233643231373736353935616532346135636138373566386261363039613138376165656331646265666337393438666261613565303938623230616662"
+  ],
+  "image": {
+   "architecture": "amd64",
+   "os": "linux",
+   "rootfs": {
+    "type": "layers",
+    "diff_ids": [
+     "sha256:aaaa"
+    ]
+   },
+   "history": [
+    {
+     "created_by": "base"
+    },
+    {
+     "created_by": "ENV APP_HOME=/srv APP_ENV=prod",
+     "comment": "buildkit.dockerfile.v0",
+     "empty_layer": true
+    },
+    {
+     "created_by": "WORKDIR /srv",
+     "comment": "buildkit.dockerfile.v0"
+    },
+    {
+     "created_by": "RUN /bin/sh -c echo \"$APP_ENV\" \u003e env.txt # buildkit",
+     "comment": "buildkit.dockerfile.v0"
+    }
+   ],
+   "config": {
+    "Env": [
+     "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+     "APP_HOME=/srv",
+     "APP_ENV=prod"
+    ],
+    "Cmd": [
+     "/bin/sh"
+    ],
+    "WorkingDir": "/srv"
+   }
+  },
+  "metadata": {
+   "sha256:0eb3d21776595ae24a5ca875f8ba609a187aeec1dbefc7948fbaa5e098b20afb": {
+    "caps": [
+     "exec.meta.base",
+     "exec.meta.setsdefaultpath",
+     "exec.mount.bind"
+    ],
+    "description": {
+     "com.docker.dockerfile.v1.command": "RUN echo \"$APP_ENV\" \u003e env.txt",
+     "llb.customname": "[3/3] RUN echo \"prod\" \u003e env.txt"
+    }
+   },
+   "sha256:7718fa441f4b0283bbf46041dc2f7f40f00ad0eaccd8c373f9b9e8a2f9f029e1": {
+    "caps": [
+     "constraints",
+     "meta.description",
+     "platform"
+    ]
+   },
+   "sha256:a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0": {
+    "caps": [
+     "source.image"
+    ],
+    "description": {
+     "com.docker.dockerfile.v1.command": "FROM alpine:3.20",
+     "llb.customname": "[1/3] FROM docker.io/library/alpine:3.20@sha256:75be9c490b21b793193f47be0daf1e1ba283c3a002c8e84091e2c871cc49f219"
+    }
+   },
+   "sha256:cbb2ce1ae3ee3fb504a5c4624751c152c7065e25fb8db861061c9124c43d2e57": {
+    "caps": [
+     "file.base"
+    ],
+    "description": {
+     "llb.customname": "[2/3] WORKDIR /srv"
+    }
+   }
+  }
+ },
+ {
+  "name": "03-copy-context",
+  "digests": [
+   "sha256:a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0",
+   "sha256:7b0b75d68f220c1bed9aab642a3d8fa3e8e70756bee7eca7c78b81eba5400358",
+   "sha256:ed1809b6ae1c650bf62d31a1354deab9868bce14fa363c9f671a708764f9d74d",
+   "sha256:433b508338bf160e7458e5cb507d71df6ce699da83e4e4ac8beec663ef9ca6b4",
+   "sha256:1786b9953b17e8a76224293817c804ec713bfda8db4d234eeed633aa6aad6ffa",
+   "sha256:721fd568a158e48427996d7fdadd06f147c9f7be472765e6000e00eafc040e90"
+  ],
+  "hexes": [
+   "520e0a05616d64363412056c696e75785a001a760a74646f636b65722d696d6167653a2f2f646f636b65722e696f2f6c6962726172792f616c70696e653a332e3230407368613235363a37356265396334393062323162373933313933663437626530646166316531626132383363336130303263386538343039316532633837316363343966323139",
+   "0a490a477368613235363a613630623266633964336235343637333530366332613930306565303932633533633239316432313361623531353339633165626663653232633532343061305a002225122310ffffffffffffffffff0132160a042f61707010ed03180128ffffffffffffffffff01",
+   "5a001a7f0a0f6c6f63616c3a2f2f636f6e74657874122b0a116c6f63616c2e666f6c6c6f77706174687312165b227061636b6167652e6a736f6e222c22737263225d121e0a136c6f63616c2e7368617265646b657968696e741207636f6e74657874121f0a0c6c6f63616c2e756e69717565120f66697865642d756e697175652d6964",
+   "0a490a477368613235363a376230623735643638663232306331626564396161623634326133643866613365386537303735366265653765636137633738623831656261353430303335380a490a477368613235363a656431383039623661653163363530626636326433316131333534646561623938363862636531346661333633633966363731613730383736346639643734645a00223c123a100122360a0d2f7061636b6167652e6a736f6e12052f6170702f20ffffffffffffffffff012801300140014801500158ffffffffffffffffff01",
+   "0a490a477368613235363a343333623530383333386266313630653734353865356362353037643731646636636536393964613833653465346163386265656336363365663963613662340a490a477368613235363a656431383039623661653163363530626636326433316131333534646561623938363862636531346661333633633966363731613730383736346639643734645a0022361234100122300a042f73726312082f6170702f73726320ffffffffffffffffff012801300140014801500158ffffffffffffffffff01",
+   "0a490a477368613235363a31373836623939353362313765386137363232343239333831376338303465633731336266646138646234643233346565656436333361613661616436666661"
+  ],
+  "image": {
+   "architecture": "amd64",
+   "os": "linux",
+   "rootfs": {
+    "type": "layers",
+    "diff_ids": [
+     "sha256:aaaa"
+    ]
+   },
+   "history": [
+    {
+     "created_by": "base"
+    },
+    {
+     "created_by": "WORKDIR /app",
+     "comment": "buildkit.dockerfile.v0"
+    },
+    {
+     "created_by": "COPY package.json ./ # buildkit",
+     "comment": "buildkit.dockerfile.v0"
+    },
+    {
+     "created_by": "COPY src /app/src # buildkit",
+     "comment": "buildkit.dockerfile.v0"
+    }
+   ],
+   "config": {
+    "Env": [
+     "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    ],
+    "Cmd": [
+     "/bin/sh"
+    ],
+    "WorkingDir": "/app"
+   }
+  },
+  "metadata": {
+   "sha256:1786b9953b17e8a76224293817c804ec713bfda8db4d234eeed633aa6aad6ffa": {
+    "caps": [
+     "file.base"
+    ],
+    "description": {
+     "llb.customname": "[4/4] COPY src /app/src"
+    }
+   },
+   "sha256:433b508338bf160e7458e5cb507d71df6ce699da83e4e4ac8beec663ef9ca6b4": {
+    "caps": [
+     "file.base"
+    ],
+    "description": {
+     "llb.customname": "[3/4] COPY package.json ./"
+    }
+   },
+   "sha256:721fd568a158e48427996d7fdadd06f147c9f7be472765e6000e00eafc040e90": {
+    "caps": [
+     "constraints",
+     "meta.description",
+     "platform"
+    ]
+   },
+   "sha256:7b0b75d68f220c1bed9aab642a3d8fa3e8e70756bee7eca7c78b81eba5400358": {
+    "caps": [
+     "file.base"
+    ],
+    "description": {
+     "llb.customname": "[2/4] WORKDIR /app"
+    }
+   },
+   "sha256:a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0": {
+    "caps": [
+     "source.image"
+    ],
+    "description": {
+     "com.docker.dockerfile.v1.command": "FROM alpine:3.20",
+     "llb.customname": "[1/4] FROM docker.io/library/alpine:3.20@sha256:75be9c490b21b793193f47be0daf1e1ba283c3a002c8e84091e2c871cc49f219"
+    }
+   },
+   "sha256:ed1809b6ae1c650bf62d31a1354deab9868bce14fa363c9f671a708764f9d74d": {
+    "caps": [
+     "source.local",
+     "source.local.followpaths",
+     "source.local.sharedkeyhint",
+     "source.local.unique"
+    ],
+    "description": {
+     "llb.customname": "[internal] load build context"
+    }
+   }
+  }
+ },
+ {
+  "name": "04-multistage",
+  "digests": [
+   "sha256:a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0",
+   "sha256:f78a9a36ea369e4cd73dd52c6af84bca65c1af232ea9862eb5b938d5cdaed42c",
+   "sha256:02a18e9da8498aa2a85e79ddf77c0a4b7c3c47d8f7b0a5ea376e4c1da8842704",
+   "sha256:319c0a006f2a65c84c6eca9d5dafecad6dc064eb8f4650ce77080b33a3a96138",
+   "sha256:b5bca03690c938ec537401440e6ead73230aa7b239cdf3bd64bce839a944a6fe",
+   "sha256:e0c806843eb5362d81eb26134508c2b00eeb686adbfaa285ab16fc75ac2545ff",
+   "sha256:825d7fea6385dad57aa1a93f4dae8a2c76081d4288d982c86092bde54d7f5a72",
+   "sha256:fb33a838d115407042a8e189748f3475fa40c3ea8b04d2850c6999ef3ca6cee1"
+  ],
+  "hexes": [
+   "520e0a05616d64363412056c696e75785a001a760a74646f636b65722d696d6167653a2f2f646f636b65722e696f2f6c6962726172792f616c70696e653a332e3230407368613235363a37356265396334393062323162373933313933663437626530646166316531626132383363336130303263386538343039316532633837316363343966323139",
+   "520e0a05616d64363412056c696e75785a001a790a77646f636b65722d696d6167653a2f2f646f636b65722e696f2f6c6962726172792f6e6f64653a32302d616c70696e65407368613235363a36656434616430353564383137326265303530663437613533653339356336383666326631333264623365653761353563316436303664356162356666643230",
+   "0a490a477368613235363a663738613961333665613336396534636437336464353263366166383462636136356331616632333265613938363265623562393338643563646165643432635a002231122f10ffffffffffffffffff0132220a042f61707010ed031801220a0a080a060a046e6f646528ffffffffffffffffff01",
+   "5a001a520a0f6c6f63616c3a2f2f636f6e74657874121e0a136c6f63616c2e7368617265646b657968696e741207636f6e74657874121f0a0c6c6f63616c2e756e69717565120f66697865642d756e697175652d6964",
+   "0a490a477368613235363a303261313865396461383439386161326138356537396464663737633061346237633363343764386637623061356561333736653463316461383834323730340a490a477368613235363a333139633061303036663261363563383463366563613964356461666563616436646330363465623866343635306365373730383062333361336139363133385a002230122e1001222a0a012f12052f6170702f20ffffffffffffffffff012801300140014801500158ffffffffffffffffff01",
+   "0a490a477368613235363a62356263613033363930633933386563353337343031343430653665616437333233306161376232333963646633626436346263653833396139343461366665520e0a05616d64363412056c696e75785a00128a010a82010a072f62696e2f73680a022d630a0d6e706d2072756e206275696c641241504154483d2f7573722f6c6f63616c2f7362696e3a2f7573722f6c6f63616c2f62696e3a2f7573722f7362696e3a2f7573722f62696e3a2f7362696e3a2f62696e12134e4f44455f56455253494f4e3d32302e302e301a042f61707022046e6f6465580112031a012f",
+   "0a490a477368613235363a613630623266633964336235343637333530366332613930306565303932633533633239316432313361623531353339633165626663653232633532343061300a490a477368613235363a653063383036383433656235333632643831656232363133343530386332623030656562363836616462666161323835616231366663373561633235343566665a0022371235100122310a092f6170702f6469737412042f73727620ffffffffffffffffff012801300140014801500158ffffffffffffffffff01",
+   "0a490a477368613235363a38323564376665613633383564616435376161316139336634646165386132633736303831643432383864393832633836303932626465353464376635613732"
+  ],
+  "image": {
+   "architecture": "amd64",
+   "os": "linux",
+   "rootfs": {
+    "type": "layers",
+    "diff_ids": [
+     "sha256:aaaa"
+    ]
+   },
+   "history": [
+    {
+     "created_by": "base"
+    },
+    {
+     "created_by": "COPY /app/dist /srv # buildkit",
+     "comment": "buildkit.dockerfile.v0"
+    },
+    {
+     "created_by": "CMD [\"/srv/start\"]",
+     "comment": "buildkit.dockerfile.v0",
+     "empty_layer": true
+    }
+   ],
+   "config": {
+    "Env": [
+     "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    ],
+    "Cmd": [
+     "/srv/start"
+    ],
+    "ArgsEscaped": true
+   }
+  },
+  "metadata": {
+   "sha256:02a18e9da8498aa2a85e79ddf77c0a4b7c3c47d8f7b0a5ea376e4c1da8842704": {
+    "caps": [
+     "file.base"
+    ],
+    "description": {
+     "llb.customname": "[build 2/4] WORKDIR /app"
+    }
+   },
+   "sha256:319c0a006f2a65c84c6eca9d5dafecad6dc064eb8f4650ce77080b33a3a96138": {
+    "caps": [
+     "source.local",
+     "source.local.sharedkeyhint",
+     "source.local.unique"
+    ],
+    "description": {
+     "llb.customname": "[internal] load build context"
+    }
+   },
+   "sha256:825d7fea6385dad57aa1a93f4dae8a2c76081d4288d982c86092bde54d7f5a72": {
+    "caps": [
+     "file.base"
+    ],
+    "description": {
+     "llb.customname": "[runtime 2/2] COPY --from=build /app/dist /srv"
+    }
+   },
+   "sha256:a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0": {
+    "caps": [
+     "source.image"
+    ],
+    "description": {
+     "com.docker.dockerfile.v1.command": "FROM alpine:3.20 AS runtime",
+     "llb.customname": "[runtime 1/2] FROM docker.io/library/alpine:3.20@sha256:75be9c490b21b793193f47be0daf1e1ba283c3a002c8e84091e2c871cc49f219"
+    }
+   },
+   "sha256:b5bca03690c938ec537401440e6ead73230aa7b239cdf3bd64bce839a944a6fe": {
+    "caps": [
+     "file.base"
+    ],
+    "description": {
+     "llb.customname": "[build 3/4] COPY . ."
+    }
+   },
+   "sha256:e0c806843eb5362d81eb26134508c2b00eeb686adbfaa285ab16fc75ac2545ff": {
+    "caps": [
+     "exec.meta.base",
+     "exec.meta.setsdefaultpath",
+     "exec.mount.bind"
+    ],
+    "description": {
+     "com.docker.dockerfile.v1.command": "RUN npm run build",
+     "llb.customname": "[build 4/4] RUN npm run build"
+    }
+   },
+   "sha256:f78a9a36ea369e4cd73dd52c6af84bca65c1af232ea9862eb5b938d5cdaed42c": {
+    "caps": [
+     "source.image"
+    ],
+    "description": {
+     "com.docker.dockerfile.v1.command": "FROM node:20-alpine AS build",
+     "llb.customname": "[build 1/4] FROM docker.io/library/node:20-alpine@sha256:6ed4ad055d8172be050f47a53e395c686f2f132db3ee7a55c1d606d5ab5ffd20"
+    }
+   },
+   "sha256:fb33a838d115407042a8e189748f3475fa40c3ea8b04d2850c6999ef3ca6cee1": {
+    "caps": [
+     "constraints",
+     "meta.description",
+     "platform"
+    ]
+   }
+  }
+ },
+ {
+  "name": "05-args",
+  "digests": [
+   "sha256:a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0",
+   "sha256:d95d12ce0085650ca7ba278411bb96038c4486fee999a78755eed05f0e60c673",
+   "sha256:9906eb7d0bcfe66406000bf87c3f2265d370960e4221dbf18b424f3b20ea4e76"
+  ],
+  "hexes": [
+   "520e0a05616d64363412056c696e75785a001a760a74646f636b65722d696d6167653a2f2f646f636b65722e696f2f6c6962726172792f616c70696e653a332e3230407368613235363a37356265396334393062323162373933313933663437626530646166316531626132383363336130303263386538343039316532633837316363343966323139",
+   "0a490a477368613235363a61363062326663396433623534363733353036633261393030656530393263353363323931643231336162353135333963316562666365323263353234306130520e0a05616d64363412056c696e75785a001285010a7e0a072f62696e2f73680a022d630a1a6563686f2022244752454554494e4720244255494c445f4944221241504154483d2f7573722f6c6f63616c2f7362696e3a2f7573722f6c6f63616c2f62696e3a2f7573722f7362696e3a2f7573722f62696e3a2f7362696e3a2f62696e120b4752454554494e473d68691a012f580112031a012f",
+   "0a490a477368613235363a64393564313263653030383536353063613762613237383431316262393630333863343438366665653939396137383735356565643035663065363063363733"
+  ],
+  "image": {
+   "architecture": "amd64",
+   "os": "linux",
+   "rootfs": {
+    "type": "layers",
+    "diff_ids": [
+     "sha256:aaaa"
+    ]
+   },
+   "history": [
+    {
+     "created_by": "base"
+    },
+    {
+     "created_by": "ARG BUILD_ID",
+     "comment": "buildkit.dockerfile.v0",
+     "empty_layer": true
+    },
+    {
+     "created_by": "ARG GREETING=hi",
+     "comment": "buildkit.dockerfile.v0",
+     "empty_layer": true
+    },
+    {
+     "created_by": "RUN |2 BUILD_ID= GREETING=hi /bin/sh -c echo \"$GREETING $BUILD_ID\" # buildkit",
+     "comment": "buildkit.dockerfile.v0"
+    }
+   ],
+   "config": {
+    "Env": [
+     "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    ],
+    "Cmd": [
+     "/bin/sh"
+    ]
+   }
+  },
+  "metadata": {
+   "sha256:9906eb7d0bcfe66406000bf87c3f2265d370960e4221dbf18b424f3b20ea4e76": {
+    "caps": [
+     "constraints",
+     "meta.description",
+     "platform"
+    ]
+   },
+   "sha256:a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0": {
+    "caps": [
+     "source.image"
+    ],
+    "description": {
+     "com.docker.dockerfile.v1.command": "FROM alpine:${VERSION}",
+     "llb.customname": "[1/2] FROM docker.io/library/alpine:3.20@sha256:75be9c490b21b793193f47be0daf1e1ba283c3a002c8e84091e2c871cc49f219"
+    }
+   },
+   "sha256:d95d12ce0085650ca7ba278411bb96038c4486fee999a78755eed05f0e60c673": {
+    "caps": [
+     "exec.meta.base",
+     "exec.meta.setsdefaultpath",
+     "exec.mount.bind"
+    ],
+    "description": {
+     "com.docker.dockerfile.v1.command": "RUN echo \"$GREETING $BUILD_ID\"",
+     "llb.customname": "[2/2] RUN echo \"hi $BUILD_ID\""
+    }
+   }
+  }
+ },
+ {
+  "name": "06-run-mounts",
+  "digests": [
+   "sha256:a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0",
+   "sha256:319c0a006f2a65c84c6eca9d5dafecad6dc064eb8f4650ce77080b33a3a96138",
+   "sha256:a6b54d5385e79933cd35ce9ff059af392975d99b9f34653c78b09f3867b6e605",
+   "sha256:d9299313f75b2ceb1e5a3cae192c010afb84330e1a61543c73cb004e1646756d"
+  ],
+  "hexes": [
+   "520e0a05616d64363412056c696e75785a001a760a74646f636b65722d696d6167653a2f2f646f636b65722e696f2f6c6962726172792f616c70696e653a332e3230407368613235363a37356265396334393062323162373933313933663437626530646166316531626132383363336130303263386538343039316532633837316363343966323139",
+   "5a001a520a0f6c6f63616c3a2f2f636f6e74657874121e0a136c6f63616c2e7368617265646b657968696e741207636f6e74657874121f0a0c6c6f63616c2e756e69717565120f66697865642d756e697175652d6964",
+   "0a490a477368613235363a613630623266633964336235343637333530366332613930306565303932633533633239316432313361623531353339633165626663653232633532343061300a490a477368613235363a33313963306130303666326136356338346336656361396435646166656361643664633036346562386634363530636537373038306233336133613936313338520e0a05616d64363412056c696e75785a001286030a8c010a072f62696e2f73680a022d630a0c61706b20616464206375726c1241504154483d2f7573722f6c6f63616c2f7362696e3a2f7573722f6c6f63616c2f62696e3a2f7573722f7362696e3a2f7573722f62696e3a2f7362696e3a2f62696e12275353485f415554485f534f434b3d2f72756e2f6275696c646b69742f7373685f6167656e742e301a012f580112031a012f121f080112042f6574631a082f6d6e742f65746320ffffffffffffffffff012801122908ffffffffffffffffff011a092f746d702f776f726b20ffffffffffffffffff0130049a0103088008123e08ffffffffffffffffff011a0e2f7661722f63616368652f61706b20ffffffffffffffffff013003a201130a0f2f2f7661722f63616368652f61706b1002123008ffffffffffffffffff011a122f72756e2f736563726574732f746f6b656e3001aa010c0a05746f6b656e2080022801123008ffffffffffffffffff011a192f72756e2f6275696c646b69742f7373685f6167656e742e303002b2010520800328011802",
+   "0a490a477368613235363a61366235346435333835653739393333636433356365396666303539616633393239373564393962396633343635336337386230396633383637623665363035"
+  ],
+  "image": {
+   "architecture": "amd64",
+   "os": "linux",
+   "rootfs": {
+    "type": "layers",
+    "diff_ids": [
+     "sha256:aaaa"
+    ]
+   },
+   "history": [
+    {
+     "created_by": "base"
+    },
+    {
+     "created_by": "RUN /bin/sh -c apk add curl # buildkit",
+     "comment": "buildkit.dockerfile.v0"
+    }
+   ],
+   "config": {
+    "Env": [
+     "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    ],
+    "Cmd": [
+     "/bin/sh"
+    ]
+   }
+  },
+  "metadata": {
+   "sha256:319c0a006f2a65c84c6eca9d5dafecad6dc064eb8f4650ce77080b33a3a96138": {
+    "caps": [
+     "source.local",
+     "source.local.sharedkeyhint",
+     "source.local.unique"
+    ],
+    "description": {
+     "llb.customname": "[internal] load build context"
+    }
+   },
+   "sha256:a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0": {
+    "caps": [
+     "source.image"
+    ],
+    "description": {
+     "com.docker.dockerfile.v1.command": "FROM alpine:3.20",
+     "llb.customname": "[stage-0 1/2] FROM docker.io/library/alpine:3.20@sha256:75be9c490b21b793193f47be0daf1e1ba283c3a002c8e84091e2c871cc49f219"
+    }
+   },
+   "sha256:a6b54d5385e79933cd35ce9ff059af392975d99b9f34653c78b09f3867b6e605": {
+    "caps": [
+     "exec.meta.base",
+     "exec.meta.network",
+     "exec.meta.setsdefaultpath",
+     "exec.mount.bind",
+     "exec.mount.cache",
+     "exec.mount.cache.sharing",
+     "exec.mount.secret",
+     "exec.mount.selector",
+     "exec.mount.ssh",
+     "exec.mount.tmpfs",
+     "exec.mount.tmpfs.size"
+    ],
+    "description": {
+     "com.docker.dockerfile.v1.command": "RUN --mount=type=cache,target=/var/cache/apk,sharing=locked     --mount=type=bind,source=/etc,target=/mnt/etc,ro     --mount=type=tmpfs,target=/tmp/work,size=1024     --mount=type=secret,id=token     --mount=type=ssh     --network=none     apk add curl",
+     "llb.customname": "[stage-0 2/2] RUN --mount=type=cache,target=/var/cache/apk,sharing=locked     --mount=type=bind,source=/etc,target=/mnt/etc,ro     --mount=type=tmpfs,target=/tmp/work,size=1024     --mount=type=secret,id=token     --mount=type=ssh     --network=none     apk add curl"
+    }
+   },
+   "sha256:d9299313f75b2ceb1e5a3cae192c010afb84330e1a61543c73cb004e1646756d": {
+    "caps": [
+     "constraints",
+     "meta.description",
+     "platform"
+    ]
+   }
+  }
+ },
+ {
+  "name": "07-scratch",
+  "digests": [
+   "sha256:67420a3a6244ae55df799ffa6df7829fd198772a0c3a35c97e8c4a0733eea467",
+   "sha256:0be7987316682b9f82cd2edc3afabf9bcb5a1045b5708642eb35e3f092602688",
+   "sha256:402e7b4e4d5fbfcff641051e6db029393a73468f8f1c73ea12e7054fab09ea12"
+  ],
+  "hexes": [
+   "5a001a740a0f6c6f63616c3a2f2f636f6e7465787412200a116c6f63616c2e666f6c6c6f777061746873120b5b2262696e2f617070225d121e0a136c6f63616c2e7368617265646b657968696e741207636f6e74657874121f0a0c6c6f63616c2e756e69717565120f66697865642d756e697175652d6964",
+   "0a490a477368613235363a363734323061336136323434616535356466373939666661366466373832396664313938373732613063336133356339376538633461303733336565613436375a00223f123d08ffffffffffffffffff0122300a082f62696e2f61707012042f61707020ffffffffffffffffff012801300140014801500158ffffffffffffffffff01",
+   "0a490a477368613235363a30626537393837333136363832623966383263643265646333616661626639626362356131303435623537303836343265623335653366303932363032363838"
+  ],
+  "image": {
+   "architecture": "amd64",
+   "os": "linux",
+   "rootfs": {
+    "type": "layers",
+    "diff_ids": null
+   },
+   "history": [
+    {
+     "created_by": "COPY bin/app /app # buildkit",
+     "comment": "buildkit.dockerfile.v0"
+    },
+    {
+     "created_by": "ENTRYPOINT [\"/app\"]",
+     "comment": "buildkit.dockerfile.v0",
+     "empty_layer": true
+    }
+   ],
+   "config": {
+    "Env": [
+     "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    ],
+    "Entrypoint": [
+     "/app"
+    ],
+    "WorkingDir": "/"
+   }
+  },
+  "metadata": {
+   "sha256:0be7987316682b9f82cd2edc3afabf9bcb5a1045b5708642eb35e3f092602688": {
+    "caps": [
+     "file.base"
+    ],
+    "description": {
+     "llb.customname": "[1/1] COPY bin/app /app"
+    }
+   },
+   "sha256:402e7b4e4d5fbfcff641051e6db029393a73468f8f1c73ea12e7054fab09ea12": {
+    "caps": [
+     "constraints",
+     "meta.description",
+     "platform"
+    ]
+   },
+   "sha256:67420a3a6244ae55df799ffa6df7829fd198772a0c3a35c97e8c4a0733eea467": {
+    "caps": [
+     "source.local",
+     "source.local.followpaths",
+     "source.local.sharedkeyhint",
+     "source.local.unique"
+    ],
+    "description": {
+     "llb.customname": "[internal] load build context"
+    }
+   }
+  }
+ },
+ {
+  "name": "08-heredoc",
+  "digests": [
+   "sha256:a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0",
+   "sha256:9445c77665a8f08ed256c3b60050063594fa2b255b3798cb990fbf1e6e377659",
+   "sha256:50269ed77b7dc9d7299df2cba0c5b26fbef8dff072fa893bd97dd469f0b98346",
+   "sha256:187f70b59620ca4565bb85d394eb719cdedc415a1a662d135dfff76342c7e725",
+   "sha256:42649c76fbf6526b5c3c022aed338b9cf11a5ff7185e1de21eb22419ffe5914a"
+  ],
+  "hexes": [
+   "520e0a05616d64363412056c696e75785a001a760a74646f636b65722d696d6167653a2f2f646f636b65722e696f2f6c6962726172792f616c70696e653a332e3230407368613235363a37356265396334393062323162373933313933663437626530646166316531626132383363336130303263386538343039316532633837316363343966323139",
+   "0a490a477368613235363a61363062326663396433623534363733353036633261393030656530393263353363323931643231336162353135333963316562666365323263353234306130520e0a05616d64363412056c696e75785a0012750a6e0a072f62696e2f73680a022d630a17736574202d6575780a6563686f206275696c64696e670a1241504154483d2f7573722f6c6f63616c2f7362696e3a2f7573722f6c6f63616c2f62696e3a2f7573722f7362696e3a2f7573722f62696e3a2f7362696e3a2f62696e1a012f580112031a012f",
+   "5a00223c123a08ffffffffffffffffff0110ffffffffffffffffff012a220a052f434f4e4610a4031a0b6e616d65203d206170700a28ffffffffffffffffff01",
+   "0a490a477368613235363a393434356337373636356138663038656432353663336236303035303036333539346661326232353562333739386362393930666266316536653337373635390a490a477368613235363a353032363965643737623764633964373239396466326362613063356232366662656638646666303732666138393362643937646434363966306239383334365a00223412321001222e0a052f434f4e46120d2f6574632f6170702e636f6e6620ffffffffffffffffff01400158ffffffffffffffffff01",
+   "0a490a477368613235363a31383766373062353936323063613435363562623835643339346562373139636465646334313561316136363264313335646666663736333432633765373235"
+  ],
+  "image": {
+   "architecture": "amd64",
+   "os": "linux",
+   "rootfs": {
+    "type": "layers",
+    "diff_ids": [
+     "sha256:aaaa"
+    ]
+   },
+   "history": [
+    {
+     "created_by": "base"
+    },
+    {
+     "created_by": "RUN /bin/sh -c set -eux\necho building\n # buildkit",
+     "comment": "buildkit.dockerfile.v0"
+    },
+    {
+     "created_by": "COPY \u003c\u003cCONF /etc/app.conf # buildkit",
+     "comment": "buildkit.dockerfile.v0"
+    }
+   ],
+   "config": {
+    "Env": [
+     "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    ],
+    "Cmd": [
+     "/bin/sh"
+    ]
+   }
+  },
+  "metadata": {
+   "sha256:187f70b59620ca4565bb85d394eb719cdedc415a1a662d135dfff76342c7e725": {
+    "caps": [
+     "file.base"
+    ],
+    "description": {
+     "llb.customname": "[3/3] COPY \u003c\u003cCONF /etc/app.conf"
+    }
+   },
+   "sha256:42649c76fbf6526b5c3c022aed338b9cf11a5ff7185e1de21eb22419ffe5914a": {
+    "caps": [
+     "constraints",
+     "meta.description",
+     "platform"
+    ]
+   },
+   "sha256:50269ed77b7dc9d7299df2cba0c5b26fbef8dff072fa893bd97dd469f0b98346": {
+    "caps": [
+     "file.base"
+    ],
+    "description": {
+     "llb.customname": "[internal] preparing inline document"
+    }
+   },
+   "sha256:9445c77665a8f08ed256c3b60050063594fa2b255b3798cb990fbf1e6e377659": {
+    "caps": [
+     "exec.meta.base",
+     "exec.meta.setsdefaultpath",
+     "exec.mount.bind"
+    ],
+    "description": {
+     "com.docker.dockerfile.v1.command": "RUN \u003c\u003cEOT",
+     "llb.customname": "[2/3] RUN \u003c\u003cEOT (set -eux...)"
+    }
+   },
+   "sha256:a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0": {
+    "caps": [
+     "source.image"
+    ],
+    "description": {
+     "com.docker.dockerfile.v1.command": "FROM alpine:3.20",
+     "llb.customname": "[1/3] FROM docker.io/library/alpine:3.20@sha256:75be9c490b21b793193f47be0daf1e1ba283c3a002c8e84091e2c871cc49f219"
+    }
+   }
+  }
+ },
+ {
+  "name": "09-metadata",
+  "digests": [
+   "sha256:a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0",
+   "sha256:49868d3db54fc8dd677b060c57ec98d6acd84bc2c23dfc6fa9ddc05fc38480a1"
+  ],
+  "hexes": [
+   "520e0a05616d64363412056c696e75785a001a760a74646f636b65722d696d6167653a2f2f646f636b65722e696f2f6c6962726172792f616c70696e653a332e3230407368613235363a37356265396334393062323162373933313933663437626530646166316531626132383363336130303263386538343039316532633837316363343966323139",
+   "0a490a477368613235363a61363062326663396433623534363733353036633261393030656530393263353363323931643231336162353135333963316562666365323263353234306130"
+  ],
+  "image": {
+   "architecture": "amd64",
+   "os": "linux",
+   "rootfs": {
+    "type": "layers",
+    "diff_ids": [
+     "sha256:aaaa"
+    ]
+   },
+   "history": [
+    {
+     "created_by": "base"
+    },
+    {
+     "created_by": "LABEL org.opencontainers.image.source=https://example.com",
+     "comment": "buildkit.dockerfile.v0",
+     "empty_layer": true
+    },
+    {
+     "created_by": "USER 1000:1000",
+     "comment": "buildkit.dockerfile.v0",
+     "empty_layer": true
+    },
+    {
+     "created_by": "EXPOSE [8080/tcp 9090/udp]",
+     "comment": "buildkit.dockerfile.v0",
+     "empty_layer": true
+    },
+    {
+     "created_by": "VOLUME [/data]",
+     "comment": "buildkit.dockerfile.v0",
+     "empty_layer": true
+    },
+    {
+     "created_by": "STOPSIGNAL SIGTERM",
+     "comment": "buildkit.dockerfile.v0",
+     "empty_layer": true
+    },
+    {
+     "created_by": "HEALTHCHECK {Test:[CMD /bin/check] Interval:30s Timeout:0s StartPeriod:0s StartInterval:0s Retries:3}",
+     "comment": "buildkit.dockerfile.v0",
+     "empty_layer": true
+    },
+    {
+     "created_by": "ENTRYPOINT [\"/bin/app\"]",
+     "comment": "buildkit.dockerfile.v0",
+     "empty_layer": true
+    },
+    {
+     "created_by": "CMD [\"--serve\"]",
+     "comment": "buildkit.dockerfile.v0",
+     "empty_layer": true
+    }
+   ],
+   "config": {
+    "User": "1000:1000",
+    "ExposedPorts": {
+     "8080/tcp": {},
+     "9090/udp": {}
+    },
+    "Env": [
+     "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    ],
+    "Entrypoint": [
+     "/bin/app"
+    ],
+    "Cmd": [
+     "--serve"
+    ],
+    "Volumes": {
+     "/data": {}
+    },
+    "Labels": {
+     "org.opencontainers.image.source": "https://example.com"
+    },
+    "StopSignal": "SIGTERM",
+    "ArgsEscaped": true,
+    "Healthcheck": {
+     "Test": [
+      "CMD",
+      "/bin/check"
+     ],
+     "Interval": 30000000000,
+     "Retries": 3
+    }
+   }
+  },
+  "metadata": {
+   "sha256:49868d3db54fc8dd677b060c57ec98d6acd84bc2c23dfc6fa9ddc05fc38480a1": {
+    "caps": [
+     "constraints",
+     "meta.description",
+     "platform"
+    ]
+   },
+   "sha256:a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0": {
+    "caps": [
+     "source.image"
+    ],
+    "description": {
+     "com.docker.dockerfile.v1.command": "FROM alpine:3.20",
+     "llb.customname": "[1/1] FROM docker.io/library/alpine:3.20@sha256:75be9c490b21b793193f47be0daf1e1ba283c3a002c8e84091e2c871cc49f219"
+    }
+   }
+  }
+ },
+ {
+  "name": "10-copy-flags",
+  "digests": [
+   "sha256:a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0",
+   "sha256:5c471ded3754b5a5ae5ca59a599a71b46589c0832959a886dc9efece10d5a8aa",
+   "sha256:0a246cbe676e64c0379ca3f9ace9012005f7d7dc4efca5d48cc33af1708d3757",
+   "sha256:1abc4f8b60495806dafc78deafd419888e06b20a7d1311893091d18c16cb06e8",
+   "sha256:c24be6e224772a2c887768133f3d7a99db6de90efb249e8ac6a951141fd38699",
+   "sha256:bcdb187ea40c772e4b0b2e5aa7c0ee45a8fb1f9f58a8e516e5adf9b72e6541b6",
+   "sha256:5f23c8f8cf532b1b3f22a8fe19e0e143a7b02faf194c06c14454d4bc61b56a82"
+  ],
+  "hexes": [
+   "520e0a05616d64363412056c696e75785a001a760a74646f636b65722d696d6167653a2f2f646f636b65722e696f2f6c6962726172792f616c70696e653a332e3230407368613235363a37356265396334393062323162373933313933663437626530646166316531626132383363336130303263386538343039316532633837316363343966323139",
+   "5a001a8b010a0f6c6f63616c3a2f2f636f6e7465787412370a116c6f63616c2e666f6c6c6f77706174687312225b22612e747874222c22617263686976652e7461722e677a222c22622e747874225d121e0a136c6f63616c2e7368617265646b657968696e741207636f6e74657874121f0a0c6c6f63616c2e756e69717565120f66697865642d756e697175652d6964",
+   "0a490a477368613235363a613630623266633964336235343637333530366332613930306565303932633533633239316432313361623531353339633165626663653232633532343061300a490a477368613235363a356334373164656433373534623561356165356361353961353939613731623436353839633038333239353961383836646339656665636531306435613861615a00223e123c100122380a062f612e747874120a2f6473742f612e7478741a0a0a0310e807120310e80720a0032801300140014801500158ffffffffffffffffff01",
+   "0a490a477368613235363a356334373164656433373534623561356165356361353961353939613731623436353839633038333239353961383836646339656665636531306435613861615a002243124108ffffffffffffffffff0122340a062f622e747874120a2f6473742f622e74787420ffffffffffffffffff012801300140014801500158ffffffffffffffffff01",
+   "0a490a477368613235363a306132343663626536373665363463303337396361336639616365393031323030356637643764633465666361356434386363333361663137303864333735370a490a477368613235363a316162633466386236303439353830366461666337386465616664343139383838653036623230613764313331313839333039316431386331366362303665385a0032060a000a020801",
+   "0a490a477368613235363a633234626536653232343737326132633838373736383133336633643761393964623664653930656662323439653861633661393531313431666433383639390a490a477368613235363a356334373164656433373534623561356165356361353961353939613731623436353839633038333239353961383836646339656665636531306435613861615a00223e123c100122380a0f2f617263686976652e7461722e677a12052f6473742f20ffffffffffffffffff012801300140014801500158ffffffffffffffffff01",
+   "0a490a477368613235363a62636462313837656134306337373265346230623265356161376330656534356138666231663966353861386535313665356164663962373265363534316236"
+  ],
+  "image": {
+   "architecture": "amd64",
+   "os": "linux",
+   "rootfs": {
+    "type": "layers",
+    "diff_ids": [
+     "sha256:aaaa"
+    ]
+   },
+   "history": [
+    {
+     "created_by": "base"
+    },
+    {
+     "created_by": "COPY --chown=1000:1000 --chmod=640 a.txt /dst/a.txt # buildkit",
+     "comment": "buildkit.dockerfile.v0"
+    },
+    {
+     "created_by": "COPY b.txt /dst/b.txt # buildkit",
+     "comment": "buildkit.dockerfile.v0"
+    },
+    {
+     "created_by": "ADD archive.tar.gz /dst/ # buildkit",
+     "comment": "buildkit.dockerfile.v0"
+    }
+   ],
+   "config": {
+    "Env": [
+     "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    ],
+    "Cmd": [
+     "/bin/sh"
+    ]
+   }
+  },
+  "metadata": {
+   "sha256:0a246cbe676e64c0379ca3f9ace9012005f7d7dc4efca5d48cc33af1708d3757": {
+    "caps": [
+     "file.base"
+    ],
+    "description": {
+     "llb.customname": "[2/4] COPY --chown=1000:1000 --chmod=640 a.txt /dst/a.txt"
+    }
+   },
+   "sha256:1abc4f8b60495806dafc78deafd419888e06b20a7d1311893091d18c16cb06e8": {
+    "caps": [
+     "file.base"
+    ],
+    "description": {
+     "llb.customname": "[3/4] COPY --link b.txt /dst/b.txt"
+    }
+   },
+   "sha256:5c471ded3754b5a5ae5ca59a599a71b46589c0832959a886dc9efece10d5a8aa": {
+    "caps": [
+     "source.local",
+     "source.local.followpaths",
+     "source.local.sharedkeyhint",
+     "source.local.unique"
+    ],
+    "description": {
+     "llb.customname": "[internal] load build context"
+    }
+   },
+   "sha256:5f23c8f8cf532b1b3f22a8fe19e0e143a7b02faf194c06c14454d4bc61b56a82": {
+    "caps": [
+     "constraints",
+     "meta.description",
+     "platform"
+    ]
+   },
+   "sha256:a60b2fc9d3b54673506c2a900ee092c53c291d213ab51539c1ebfce22c5240a0": {
+    "caps": [
+     "source.image"
+    ],
+    "description": {
+     "com.docker.dockerfile.v1.command": "FROM alpine:3.20",
+     "llb.customname": "[1/4] FROM docker.io/library/alpine:3.20@sha256:75be9c490b21b793193f47be0daf1e1ba283c3a002c8e84091e2c871cc49f219"
+    }
+   },
+   "sha256:bcdb187ea40c772e4b0b2e5aa7c0ee45a8fb1f9f58a8e516e5adf9b72e6541b6": {
+    "caps": [
+     "file.base"
+    ],
+    "description": {
+     "llb.customname": "[4/4] ADD --unpack=false archive.tar.gz /dst/"
+    }
+   },
+   "sha256:c24be6e224772a2c887768133f3d7a99db6de90efb249e8ac6a951141fd38699": {
+    "caps": [
+     "mergeop"
+    ],
+    "description": {
+     "llb.customname": "[3/4] LINK COPY --link b.txt /dst/b.txt"
+    }
+   }
+  }
+ }
+]

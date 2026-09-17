@@ -1,0 +1,43 @@
+{
+  "name": "bun-dockerfile-loader",
+  "version": "0.1.0",
+  "description": "Bun loader + library for parsing, editing, printing Dockerfiles and compiling them to BuildKit LLB",
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./plugin": "./src/plugin/index.ts",
+    "./preload": "./src/plugin/preload.ts",
+    "./llb": "./src/llb/index.ts",
+    "./frontend": "./src/frontend/main.ts",
+    "./types": "./types/dockerfile.d.ts"
+  },
+  "files": [
+    "src",
+    "types",
+    "README.md",
+    "frontend.Dockerfile"
+  ],
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "example:edit": "bun run examples/edit-and-build.ts",
+    "example:llb": "bun run examples/emit-llb.ts"
+  },
+  "keywords": [
+    "bun",
+    "dockerfile",
+    "buildkit",
+    "llb",
+    "loader",
+    "plugin",
+    "docker"
+  ],
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.6.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

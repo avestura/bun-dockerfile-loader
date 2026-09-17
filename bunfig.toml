@@ -1,0 +1,5 @@
+# Registers the Dockerfile loader for `bun run` and `bun test` in this repo.
+preload = ["./src/plugin/preload.ts"]
+
+[test]
+preload = ["./src/plugin/preload.ts"]
